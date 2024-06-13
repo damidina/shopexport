@@ -5,3 +5,4 @@ pandas
 lxml
 gunicorn
 flask_cors
+aiohttp
