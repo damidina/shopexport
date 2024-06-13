@@ -1,4 +1,5 @@
 Flask
+Flask[async]
 requests
 beautifulsoup4
 pandas
