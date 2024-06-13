@@ -18,7 +18,7 @@ This Flask application scrapes product data from a Shopify store and exports it 
 ## Installation
 
 1. Clone the repository:
-git clone https://github.com/yourusername/shopify-product-scraper.git
+git clone https://github.com/damidina/shopify-product-scraper.git
 
 cd shopify-product-scraper
 
