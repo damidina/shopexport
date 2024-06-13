@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_file, jsonify
+from flask import Flask, request, render_template, send_file, jsonify, Response
 from flask_cors import CORS
 import asyncio
 import aiohttp
@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import logging
 import os
+import csv
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -140,8 +141,8 @@ async def scrape():
                             'SEO Title': '',  # This field is not available in the JSON data
                             'SEO Description': '',  # This field is not available in the JSON data
                             'Google Shopping / Google Product Category': '',  # This field is not available in the JSON data
-                            'Google Shopping / Gender': '',  # This field is not available in the JSON data
-                            'Google Shopping / Age Group': '',  # This field is not available in the JSON data
+            'Google Shopping / Gender': '',  # This field is not available in the JSON data
+            'Google Shopping / Age Group': '',  # This field is not available in the JSON data
             'Google Shopping / MPN': '',  # This field is not available in the JSON data
             'Google Shopping / Condition': '',  # This field is not available in the JSON data
             'Google Shopping / Custom Product': '',  # This field is not available in the JSON data
@@ -170,13 +171,21 @@ async def scrape():
                 logging.error("No data to write to CSV")
                 return "No data to write to CSV", 500
 
-            df = pd.DataFrame(data)
-            csv_path = 'shopify_products.csv'
-            df.to_csv(csv_path, index=False)
-            logging.info(f"CSV file created at {csv_path}")
+            # Stream the CSV data
+            def generate():
+                if not data:
+                    yield "No data available\n"
+                    return
 
-            # Return JSON data to the client
-            return jsonify(data)
+                fieldnames = data[0].keys()
+                writer = csv.DictWriter(open('shopify_products.csv', 'w'), fieldnames=fieldnames)
+                writer.writeheader()
+                for row in data:
+                    writer.writerow(row)
+                    yield ','.join([str(row[field]) for field in fieldnames]) + '\n'
+
+            return Response(generate(), mimetype='text/csv', headers={"Content-Disposition": "attachment;filename=shopify_products.csv"})
+
         except Exception as e:
             logging.error(f"An error occurred during scraping: {e}")
             return f"An error occurred: {e}", 500
