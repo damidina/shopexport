@@ -7,10 +7,40 @@
 </head>
 <body>
     <h1>Shopify Scraper</h1>
-    <form action="/scrape" method="post">
+    <form id="scrapeForm">
         <label for="shopify_url">Shopify URL:</label>
         <input type="text" id="shopify_url" name="shopify_url" required>
         <button type="submit">Scrape</button>
     </form>
+    <br>
+    <button id="downloadButton" style="display:none;">Download CSV</button>
+
+    <script>
+        document.getElementById('scrapeForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const shopifyUrl = document.getElementById('shopify_url').value;
+
+            fetch('/scrape', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ shopify_url: shopifyUrl })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Data received:', data);
+                document.getElementById('downloadButton').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+            });
+        });
+
+        document.getElementById('downloadButton').addEventListener('click', function() {
+            window.location.href = '/download_csv';
+        });
+    </script>
 </body>
 </html>

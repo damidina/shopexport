@@ -4,3 +4,4 @@ beautifulsoup4
 pandas
 lxml
 gunicorn
+flask_cors
