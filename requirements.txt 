@@ -1,9 +1,9 @@
-Flask
 Flask[async]
+flask-cors
 requests
 beautifulsoup4
 pandas
 lxml
-gunicorn
-flask_cors
 aiohttp
+asgiref
+uvicorn

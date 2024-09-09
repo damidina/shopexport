@@ -3,46 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopify Scraper</title>
+    <title>Shopify Site Scraper</title>
 </head>
 <body>
-    <h1>Shopify Scraper</h1>
+    <h1>Shopify Site Scraper</h1>
     <form id="scrapeForm">
         <label for="shopify_url">Shopify URL:</label>
-        <input type="text" id="shopify_url" name="shopify_url" required>
+        <input type="text" id="shopify_url" name="shopify_url" required><br><br>
+        
+        <label>Pages to scrape:</label><br>
+        <input type="checkbox" id="scrape_homepage" name="scrape_homepage" checked>
+        <label for="scrape_homepage">Homepage</label><br>
+        <input type="checkbox" id="scrape_products" name="scrape_products" checked>
+        <label for="scrape_products">Products</label><br>
+        
+        <label for="key_pages">Additional key pages (comma-separated):</label><br>
+        <input type="text" id="key_pages" name="key_pages"><br><br>
+        
         <button type="submit">Scrape</button>
     </form>
     <br>
-    <button id="downloadButton" style="display:none;">Download CSV</button>
+    <button id="downloadCsvButton" style="display:none;">Download CSV</button>
+    <button id="downloadJsonButton" style="display:none;">Download JSON</button>
 
     <script>
         document.getElementById('scrapeForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const shopifyUrl = document.getElementById('shopify_url').value;
+            const scrapeHomepage = document.getElementById('scrape_homepage').checked;
+            const scrapeProducts = document.getElementById('scrape_products').checked;
+            const keyPages = document.getElementById('key_pages').value.split(',').map(page => page.trim());
 
             fetch('/scrape', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ shopify_url: shopifyUrl })
+                body: JSON.stringify({
+                    shopify_url: shopifyUrl,
+                    scrape_homepage: scrapeHomepage,
+                    scrape_products: scrapeProducts,
+                    key_pages: keyPages
+                })
             })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                return response.blob();
+                return response.json();
             })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'shopify_products.csv';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.getElementById('downloadButton').style.display = 'block';
+            .then(data => {
+                document.getElementById('downloadCsvButton').style.display = 'block';
+                document.getElementById('downloadJsonButton').style.display = 'block';
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -50,8 +62,12 @@
             });
         });
 
-        document.getElementById('downloadButton').addEventListener('click', function() {
+        document.getElementById('downloadCsvButton').addEventListener('click', function() {
             window.location.href = '/download_csv';
+        });
+
+        document.getElementById('downloadJsonButton').addEventListener('click', function() {
+            window.location.href = '/download_json';
         });
     </script>
 </body>
